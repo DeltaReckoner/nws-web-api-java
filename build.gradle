@@ -1,0 +1,36 @@
+plugins {
+    id 'eclipse'
+    id 'java'
+    id 'java-library'
+    id 'maven-publish'
+}
+
+group = 'delta.nws'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.2'
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                groupId = 'delta.nws'
+                artifactId = 'nws-web-api-java'
+                version = '1.0.0'
+                from components.java
+            }
+        }
+    }
+}
