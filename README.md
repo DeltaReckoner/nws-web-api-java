@@ -1,4 +1,4 @@
-## NWS-Java
+## National Weather Service Java
 
 ### A Java API wrapper for the [National Weather Service web API](https://www.weather.gov/documentation/services-web-api).
 
