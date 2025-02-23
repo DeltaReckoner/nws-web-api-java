@@ -1,6 +1,5 @@
 package nws;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nws.models.gridpoint.Gridpoint;
@@ -11,7 +10,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 /**
  * The Java client to make requests to the National Weather Service's web API.
@@ -33,23 +31,24 @@ public class NWSClient {
      * @param latitude X value
      * @param longitude Y value
      * @return {@link Point}
-     * @throws ExecutionException
-     * @throws InterruptedException
-     * @throws JsonProcessingException
      */
-    public Point getPoint(Double latitude, Double longitude) throws ExecutionException, InterruptedException, JsonProcessingException {
-        String requestUrl = BASE_URL + "/points/" +  latitude + "," + longitude;
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(requestUrl))
-                .header("User-Agent", "NWS-Java")
-                .GET()
-                .build();
+    public Point getPoint(Double latitude, Double longitude) {
+        try {
+            String requestUrl = BASE_URL + "/points/" +  latitude + "," + longitude;
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(requestUrl))
+                    .header("User-Agent", "NWS-Java")
+                    .GET()
+                    .build();
 
-        CompletableFuture<HttpResponse<String>> response = httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
-        String responseJson = response.thenApply(HttpResponse::body).get();
+            CompletableFuture<HttpResponse<String>> response = httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+            String responseJson = response.thenApply(HttpResponse::body).get();
 
-        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return OBJECT_MAPPER.readValue(responseJson, Point.class);
+            OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            return OBJECT_MAPPER.readValue(responseJson, Point.class);
+        } catch (Exception e) {
+            throw new RuntimeException("There was an error trying to get the point info from the given latitude and/or longitude.");
+        }
     }
 
     /**
@@ -58,22 +57,23 @@ public class NWSClient {
      * @param gridX The points grid X coordinate
      * @param gridY The points grid Y coordinate
      * @return {@link Gridpoint}
-     * @throws ExecutionException
-     * @throws InterruptedException
-     * @throws JsonProcessingException If there is an error processing the Json data that is retrieved from the API
      */
-    public Gridpoint getGridpoint(String gridId, String gridX, String gridY) throws ExecutionException, InterruptedException, JsonProcessingException {
-        String requestUrl = BASE_URL + "/gridpoints/" +  gridId + "/" + gridX + "," + gridY + "/forecast";
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(requestUrl))
-                .header("User-Agent", "NWS-Java")
-                .GET()
-                .build();
+    public Gridpoint getGridpoint(String gridId, String gridX, String gridY) {
+        try {
+            String requestUrl = BASE_URL + "/gridpoints/" +  gridId + "/" + gridX + "," + gridY + "/forecast";
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(requestUrl))
+                    .header("User-Agent", "NWS-Java")
+                    .GET()
+                    .build();
 
-        CompletableFuture<HttpResponse<String>> response = httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
-        String responseJson = response.thenApply(HttpResponse::body).get();
+            CompletableFuture<HttpResponse<String>> response = httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+            String responseJson = response.thenApply(HttpResponse::body).get();
 
-        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return OBJECT_MAPPER.readValue(responseJson, Gridpoint.class);
+            OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            return OBJECT_MAPPER.readValue(responseJson, Gridpoint.class);
+        } catch (Exception e) {
+            throw new RuntimeException("There was an error trying to get the gridpoint info from the given grid ID, X, and/or Y.");
+        }
     }
 }
